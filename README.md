@@ -1,4 +1,4 @@
-# School Project Documentation
+# FastAPI Vue Fullstack Documentation
 
 ## Overview
 
