@@ -36,6 +36,7 @@ export interface AppConfig {
   password_require_digit: boolean;
   password_require_special: boolean;
   password_expire_days: number;
+  login_attempts: number;
 }
 
 export interface AppConfigUpdate {
@@ -44,6 +45,7 @@ export interface AppConfigUpdate {
   password_require_digit?: boolean;
   password_require_special?: boolean;
   password_expire_days?: number;
+  login_attempts? : number;
 }
 
 

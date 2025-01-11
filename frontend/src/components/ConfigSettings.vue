@@ -10,6 +10,7 @@
   const passwordRequireDigit = ref(configStore.config.password_require_digit)
   const passwordRequireSpecial = ref(configStore.config.password_require_special)
   const passwordExpires = ref(configStore.config.password_expire_days)
+  const loginAttempts = ref(configStore.config.login_attempts)
 
 </script>
 
@@ -43,7 +44,8 @@
         password_min_length: passwordLength,
         password_require_digit: passwordRequireDigit,
         password_require_special: passwordRequireSpecial,
-        password_expire_days: passwordExpires
+        password_expire_days: passwordExpires,
+        login_attempts: loginAttempts
       })"
     >
       <v-row>
@@ -79,6 +81,15 @@
         <v-text-field
           v-model="passwordExpires"
           label="Ważność hasła w dniach"
+          min="1"
+          :rules="nonNegativeRule"
+          type="number"
+        />
+      </v-row>
+      <v-row>
+        <v-text-field
+          v-model="loginAttempts"
+          label="Ilość nieudanych logowań"
           min="1"
           :rules="nonNegativeRule"
           type="number"
