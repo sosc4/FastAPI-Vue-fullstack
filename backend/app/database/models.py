@@ -3,6 +3,8 @@ from typing import Optional
 
 from sqlmodel import SQLModel, Field
 
+from .. import enums
+
 
 class User(SQLModel, table=True):
     id: int = Field(primary_key=True)
@@ -25,4 +27,13 @@ class AppConfig(SQLModel, table=True):
     password_expire_days: int = Field(default=30)
 
 
-__all__ = ["User", "AppConfig"]
+class Log(SQLModel, table=True):
+    id: int = Field(primary_key=True)
+    user_id: int
+    event: enums.LogEvent
+    status: enums.LogStatus
+    message: Optional[str] = Field(default=None)
+    created_at: datetime.datetime = Field(default=datetime.datetime.now(datetime.timezone.utc))
+
+
+__all__ = ["User", "AppConfig", "Log"]

@@ -19,12 +19,12 @@ def init():
     if crud.get_user_by_username(db, settings.ADMIN_USERNAME):
         return
 
-    crud.create_user(db, UserCreate(
+    user = crud.create_user(db, UserCreate(
         username=settings.ADMIN_USERNAME,
         password=settings.ADMIN_INIT_PASSWORD,
     ), is_admin=True)
 
-    crud.create_config(db)
+    crud.create_config(db, user.id)
 
 
 @asynccontextmanager

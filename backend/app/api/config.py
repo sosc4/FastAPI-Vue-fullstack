@@ -31,5 +31,5 @@ def toggle_password_validation(
         db: Session = Depends(deps.get_db),
         user=Depends(deps.get_admin_user),
 ):
-    config = crud.toggle_password_validation(db)
+    config = crud.toggle_password_validation(db, user.id)
     return config
