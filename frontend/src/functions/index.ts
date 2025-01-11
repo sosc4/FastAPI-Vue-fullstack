@@ -5,8 +5,10 @@ import { useUser } from '@/stores/user'
 import { useToast } from 'vue-toastification'
 
 export async function logout () {
+  const api = Api.getInstance()
   const userStore = useUser()
 
+  await api.logout()
   await userStore.logout()
 }
 

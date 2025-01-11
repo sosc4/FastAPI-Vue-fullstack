@@ -23,6 +23,11 @@
       setting: 'users',
     },
     {
+      title: 'Dziennik aktywności',
+      icon: 'mdi-history',
+      setting: 'activity',
+    },
+    {
       icon: 'mdi-lock',
       title: 'Bezpieczeństwo',
       setting: 'config',

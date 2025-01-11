@@ -1,4 +1,12 @@
-import { AppConfig, AppConfigUpdate, PasswordChange, UserCreate, UserResponse, UserUpdate } from '@/interfaces'
+import {
+  AppConfig,
+  AppConfigUpdate,
+  LogResponse,
+  PasswordChange,
+  UserCreate,
+  UserResponse,
+  UserUpdate
+} from '@/interfaces'
 import { ApiCore } from './core'
 
 export class Api extends ApiCore {
@@ -54,6 +62,16 @@ export class Api extends ApiCore {
 
   async toggleConfigPasswordValidation () {
     const response = await this.client.post<AppConfig>('/config/password/validation')
+    return response.data
+  }
+
+  async readAllLogs () {
+    const response = await this.client.get<LogResponse[]>('/logs')
+    return response.data
+  }
+
+  async logout() {
+    const response = await this.client.post('/auth/logout')
     return response.data
   }
 }

@@ -4,6 +4,7 @@
   import UsersSettings from '@/components/UsersSettings.vue'
   import { useUser } from '@/stores/user'
   import { computed } from 'vue'
+  import LogSettings from "@/components/LogSettings.vue";
 
   const userStore = useUser()
 
@@ -24,6 +25,10 @@
       title: ref('Bezpieczeństwo'),
       component: ConfigSettings,
     },
+    activity: {
+      title: ref('Dziennik aktywności'),
+      component: LogSettings,
+    }
   }
 
   const currentSection = computed(() => {

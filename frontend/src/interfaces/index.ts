@@ -45,3 +45,13 @@ export interface AppConfigUpdate {
   password_require_special?: boolean;
   password_expire_days?: number;
 }
+
+
+export interface LogResponse {
+  id: number;
+  user_id: number;
+  event: "login" | "logout" | "password_change" | "user_added" | "user_updated" | "user_deleted" | "config_updated";
+  status: "success" | "failure"; // Adjust to match the possible values of enums.LogStatus
+  message?: string; // Optional field
+  created_at: string; // ISO 8601 datetime string format
+}
