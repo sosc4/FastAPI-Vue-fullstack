@@ -55,7 +55,7 @@ def create_user(db: Session,
         raise e
 
     finally:
-        create_log(db, admin_id or user.id, enums.LogEvent.USER_ADDED, status)
+        create_log(db, admin_id or user.id, enums.LogEvent.USER_ADDED, status, message=f"User '{user.username}' added")
 
 
 def change_password(db: Session,
@@ -116,8 +116,7 @@ def update_user(db: Session,
             if field == "password":
                 db_user = change_password(db, db_user, value,
                                           force_change=force_password_change,
-                                          admin_id=admin_id
-                                          )
+                                          admin_id=admin_id)
                 continue
 
             setattr(db_user, field, value)
@@ -131,7 +130,8 @@ def update_user(db: Session,
         raise e
 
     finally:
-        create_log(db, admin_id or db_user.id, enums.LogEvent.USER_UPDATED, status)
+        create_log(db, admin_id or db_user.id, enums.LogEvent.USER_UPDATED, status,
+                   message=f"User '{db_user.username}' updated")
 
 
 def update_config(db: Session, config: schemas.AppConfigUpdate, admin_id: int) -> models.AppConfig:
@@ -170,7 +170,8 @@ def delete_user(db: Session, db_user: models.User, *, admin_id: Optional[int] = 
         raise e
 
     finally:
-        create_log(db, admin_id or db_user.id, enums.LogEvent.USER_DELETED, success)
+        create_log(db, admin_id or db_user.id, enums.LogEvent.USER_DELETED, success,
+                   message=f"User '{db_user.username}' deleted")
 
 
 def toggle_password_validation(db: Session, user_id: int):
