@@ -44,5 +44,6 @@ def change_password(password: schemas.PasswordChange,
         raise HTTPException(status_code=400, detail="Hasło niepoprawne")
 
     user = crud.change_password(db, user, password.new_password,
-                                password_expire_days=config.password_expire_days)
+                                password_expire_days=config.password_expire_days,
+                                admin_id=user.id)
     return user

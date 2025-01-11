@@ -31,7 +31,8 @@ def create_user(user: schemas.UserCreate,
                 config: models.AppConfig = Depends(deps.get_config)):
     try:
         return crud.create_user(db, user,
-                                password_expire_days=config.password_expire_days)
+                                password_expire_days=config.password_expire_days,
+                                admin_id=admin.id)
 
     except IntegrityError:
         raise HTTPException(status_code=400, detail="Użytkownik o podanej nazwie już istnieje")
@@ -44,7 +45,7 @@ def update_user(user_id: int,
                 db: Session = Depends(deps.get_db),
                 admin: models.User = Depends(deps.get_admin_user)):
     db_user = crud.get_user_by_id(db, user_id)
-    return crud.update_user(db, db_user, user, force_password_change=True)
+    return crud.update_user(db, db_user, user, force_password_change=True, admin_id=admin.id)
 
 
 @router.delete("/{user_id}")
@@ -53,5 +54,5 @@ def delete_user(user_id: int,
                 db: Session = Depends(deps.get_db),
                 admin: models.User = Depends(deps.get_admin_user)):
     db_user = crud.get_user_by_id(db, user_id)
-    crud.delete_user(db, db_user)
+    crud.delete_user(db, db_user, admin_id=admin.id)
     return {"message": "User deleted"}

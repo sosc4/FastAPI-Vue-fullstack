@@ -32,7 +32,9 @@ def create_user(db: Session,
                 user: schemas.UserCreate,
                 *,
                 is_admin: bool = False,
-                password_expire_days: int = 30) -> models.User:
+                password_expire_days: int = 30,
+                admin_id: Optional[int] = None
+                ) -> models.User:
     hashed_password = security.get_password_hash(user.password)
     db_user = models.User(username=user.username,
                           hashed_password=hashed_password,
@@ -53,7 +55,7 @@ def create_user(db: Session,
         raise e
 
     finally:
-        create_log(db, db_user.id, enums.LogEvent.USER_ADDED, status)
+        create_log(db, admin_id or user.id, enums.LogEvent.USER_ADDED, status)
 
 
 def change_password(db: Session,
@@ -61,7 +63,8 @@ def change_password(db: Session,
                     new_password: str,
                     *,
                     force_change: bool = False,
-                    password_expire_days: int = 30
+                    password_expire_days: int = 30,
+                    admin_id: Optional[int] = 0
                     ) -> models.User:
     status = enums.LogStatus.SUCCESS
 
@@ -92,7 +95,7 @@ def change_password(db: Session,
         raise e
 
     finally:
-        create_log(db, user.id, enums.LogEvent.PASSWORD_CHANGE, status)
+        create_log(db, admin_id or user.id, enums.LogEvent.PASSWORD_CHANGE, status)
 
 
 def get_all_users(db: Session) -> list[models.User]:
@@ -103,7 +106,8 @@ def update_user(db: Session,
                 db_user: models.User,
                 user: schemas.UserUpdate,
                 *,
-                force_password_change: bool = False
+                force_password_change: bool = False,
+                admin_id: Optional[int] = None
                 ) -> models.User:
     status = enums.LogStatus.SUCCESS
 
@@ -111,7 +115,8 @@ def update_user(db: Session,
         for field, value in user.model_dump(exclude_none=True).items():
             if field == "password":
                 db_user = change_password(db, db_user, value,
-                                          force_change=force_password_change
+                                          force_change=force_password_change,
+                                          admin_id=admin_id
                                           )
                 continue
 
@@ -126,10 +131,10 @@ def update_user(db: Session,
         raise e
 
     finally:
-        create_log(db, db_user.id, enums.LogEvent.USER_UPDATED, status)
+        create_log(db, admin_id or db_user.id, enums.LogEvent.USER_UPDATED, status)
 
 
-def update_config(db: Session, config: schemas.AppConfigUpdate) -> models.AppConfig:
+def update_config(db: Session, config: schemas.AppConfigUpdate, admin_id: int) -> models.AppConfig:
     status = enums.LogStatus.SUCCESS
 
     try:
@@ -146,14 +151,14 @@ def update_config(db: Session, config: schemas.AppConfigUpdate) -> models.AppCon
         raise e
 
     finally:
-        create_log(db, 0, enums.LogEvent.CONFIG_UPDATED, status)
+        create_log(db, admin_id, enums.LogEvent.CONFIG_UPDATED, status)
 
 
 def get_user_by_id(db: Session, user_id: int) -> models.User:
     return db.get(models.User, user_id)
 
 
-def delete_user(db: Session, db_user: models.User):
+def delete_user(db: Session, db_user: models.User, *, admin_id: Optional[int] = None):
     success = enums.LogStatus.SUCCESS
 
     try:
@@ -165,7 +170,7 @@ def delete_user(db: Session, db_user: models.User):
         raise e
 
     finally:
-        create_log(db, db_user.id, enums.LogEvent.USER_DELETED, success)
+        create_log(db, admin_id or db_user.id, enums.LogEvent.USER_DELETED, success)
 
 
 def toggle_password_validation(db: Session, user_id: int):
