@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, Form
 from sqlmodel import Session
 
-from .. import schemas
+from .. import schemas, enums
 from ..core import deps
 from ..core.jwt import create_access_token
 from ..core.password import validate_password
@@ -16,15 +16,33 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 def login(username: str = Form(...),
           password: str = Form(...),
           *,
+          config: models.AppConfig = Depends(deps.get_config),
           db: Session = Depends(deps.get_db)):
     db_user = crud.get_user_by_username(db, username=username)
-    if not db_user or not verify_password(password, db_user.hashed_password):
-        raise HTTPException(status_code=400, detail="Login lub hasło niepoprawne")
 
-    return {
-        "access_token": create_access_token(data={"sub": db_user.username}),
-        "token_type": "bearer"
-    }
+    state = enums.LogStatus.SUCCESS
+    message = None
+
+    try:
+        attempts = crud.read_recent_failed_logins(db, db_user.id)
+        if len(attempts) > config.login_attempts:
+            raise HTTPException(status_code=400, detail="Konto zablokowane z powodu zbyt wielu prób logowania")
+
+        if not db_user or not verify_password(password, db_user.hashed_password):
+            raise HTTPException(status_code=400, detail="Login lub hasło niepoprawne")
+
+        return {
+            "access_token": create_access_token(data={"sub": db_user.username}),
+            "token_type": "bearer"
+        }
+
+    except Exception as e:
+        state = enums.LogStatus.FAILURE
+        message = str(e)
+        raise e
+
+    finally:
+        crud.create_log(db, db_user.id, enums.LogEvent.LOGIN, state)
 
 
 @router.patch("/password", response_model=schemas.UserResponse)
@@ -47,3 +65,11 @@ def change_password(password: schemas.PasswordChange,
                                 password_expire_days=config.password_expire_days,
                                 admin_id=user.id)
     return user
+
+
+@router.post("/logout")
+def logout(
+        db: Session = Depends(deps.get_db),
+        user=Depends(deps.get_current_user)):
+    crud.create_log(db, user.id, enums.LogEvent.LOGOUT, enums.LogStatus.SUCCESS)
+    return {"message": "Logout successful"}

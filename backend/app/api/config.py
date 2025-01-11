@@ -23,7 +23,7 @@ def update_config(
         db: Session = Depends(deps.get_db),
         user=Depends(deps.get_admin_user),
 ):
-    return crud.update_config(db, config)
+    return crud.update_config(db, config, user.id)
 
 
 @router.post("/password/validation")

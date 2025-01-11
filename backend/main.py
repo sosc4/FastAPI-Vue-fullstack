@@ -22,7 +22,7 @@ def init():
     user = crud.create_user(db, UserCreate(
         username=settings.ADMIN_USERNAME,
         password=settings.ADMIN_INIT_PASSWORD,
-    ), is_admin=True)
+    ), is_admin=True, admin_id=1)
 
     crud.create_config(db, user.id)
 

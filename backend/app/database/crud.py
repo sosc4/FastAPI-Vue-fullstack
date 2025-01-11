@@ -27,6 +27,19 @@ def read_logs(db: Session) -> list[models.Log]:
     return db.exec(select(models.Log)).all()
 
 
+def read_recent_failed_logins(db: Session, user_id: int) -> list[models.Log]:
+    time_threshold = datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(minutes=15)
+
+    query = (
+        select(models.Log)
+        .where(models.Log.user_id == user_id,
+               models.Log.event == "login",
+               models.Log.status == "FAILURE",
+               models.Log.created_at >= time_threshold)
+    )
+    return db.exec(query).all()
+
+
 def get_user_by_username(db: Session, username: str) -> models.User:
     result = db.exec(select(models.User).where(models.User.username == username))
     return result.first()
