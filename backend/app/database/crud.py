@@ -23,6 +23,10 @@ def create_log(db: Session,
     return log
 
 
+def read_logs(db: Session) -> list[models.Log]:
+    return db.exec(select(models.Log)).all()
+
+
 def get_user_by_username(db: Session, username: str) -> models.User:
     result = db.exec(select(models.User).where(models.User.username == username))
     return result.first()
