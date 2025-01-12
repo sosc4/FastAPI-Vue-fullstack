@@ -1,7 +1,9 @@
-import { JWTAccessToken } from '@/interfaces'
+import {IAccessTokenPayload, JWTAccessToken} from '@/interfaces'
 import axios, { AxiosInstance } from 'axios'
 import { Buffer } from 'buffer'
 import { useToast } from 'vue-toastification'
+import { logout } from '@/functions'
+import {useUser} from "@/stores/user";
 
 function parseToken (token: string): object {
   return JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString())
@@ -33,6 +35,36 @@ export class ApiCore {
       const token = ApiCore.token?.access_token
       if (token) {
         config.headers.Authorization = `Bearer ${token}`
+      }
+
+      // expiry is UNIX timestamp in seconds. If it is about to expire (30 seconds) send a request to /refresh
+      console.log(`Token expires in ${accessTokenPayload.exp - Date.now() / 1000} seconds`)
+
+      if (token && accessTokenPayload.exp - Date.now() / 1000 <= 0) {
+        const toast = useToast()
+        toast.error('Wylogowano z powodu wygaśnięcia sesji')
+        location.reload()
+
+        throw new Error('Token expired')
+      }
+
+      if (token && accessTokenPayload.exp - Date.now() / 1000 < 30) {
+        console.log('Refreshing token')
+        try {
+          const response = await axios.post<JWTAccessToken>(`${this.baseURL}/auth/refresh`, {}, {
+            headers: {
+              'Authorization': 'Bearer ' + token,
+            }
+          })
+
+          if (response.data.access_token) {
+            ApiCore.setToken(response.data)
+            config.headers.Authorization = `Bearer ${response.data.access_token}`
+          }
+        } catch (error) {
+          console.error(error)
+          ApiCore.clearToken()
+        }
       }
       return config
     })

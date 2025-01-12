@@ -11,6 +11,7 @@
   const passwordRequireSpecial = ref(configStore.config.password_require_special)
   const passwordExpires = ref(configStore.config.password_expire_days)
   const loginAttempts = ref(configStore.config.login_attempts)
+  const sessionExpireSeconds = ref(configStore.config.session_expire_seconds)
 
 </script>
 
@@ -45,7 +46,8 @@
         password_require_digit: passwordRequireDigit,
         password_require_special: passwordRequireSpecial,
         password_expire_days: passwordExpires,
-        login_attempts: loginAttempts
+        login_attempts: loginAttempts,
+        session_expire_seconds: sessionExpireSeconds
       })"
     >
       <v-row>
@@ -82,18 +84,29 @@
           v-model="passwordExpires"
           label="Ważność hasła w dniach"
           min="1"
-          :rules="nonNegativeRule"
+          :rules="[nonNegativeRule]"
           type="number"
         />
       </v-row>
       <v-row>
-        <v-text-field
-          v-model="loginAttempts"
-          label="Ilość nieudanych logowań"
-          min="1"
-          :rules="nonNegativeRule"
-          type="number"
-        />
+        <v-col cols="6">
+          <v-text-field
+            v-model="loginAttempts"
+            label="Ilość nieudanych logowań"
+            min="1"
+            :rules="[nonNegativeRule]"
+            type="number"
+          />
+        </v-col>
+        <v-col cols="6">
+          <v-text-field
+            v-model="sessionExpireSeconds"
+            label="Czas wygaśnięcia sesji w sekundach"
+            min="1"
+            :rules="[nonNegativeRule]"
+            type="number"
+            />
+        </v-col>
       </v-row>
       <v-row>
         <v-btn

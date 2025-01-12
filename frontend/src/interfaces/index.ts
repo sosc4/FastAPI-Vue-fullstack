@@ -37,6 +37,7 @@ export interface AppConfig {
   password_require_special: boolean;
   password_expire_days: number;
   login_attempts: number;
+  session_expire_seconds: number;
 }
 
 export interface AppConfigUpdate {
@@ -46,6 +47,7 @@ export interface AppConfigUpdate {
   password_require_special?: boolean;
   password_expire_days?: number;
   login_attempts? : number;
+  session_expire_seconds?: number;
 }
 
 
@@ -56,4 +58,10 @@ export interface LogResponse {
   status: "success" | "failure"; // Adjust to match the possible values of enums.LogStatus
   message?: string; // Optional field
   created_at: string; // ISO 8601 datetime string format
+}
+
+
+export interface IAccessTokenPayload {
+  sub: string;
+  exp: number;
 }
