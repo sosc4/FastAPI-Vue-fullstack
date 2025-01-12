@@ -1,6 +1,14 @@
 <script lang="ts" setup>
   import { Api } from '@/api/api'
-  import { banUser, createUser, deleteUser, suChangePassword, suChangeUsername, unbanUser } from '@/functions'
+  import {
+    banUser,
+    createUser,
+    deleteUser,
+    suChangeOtp,
+    suChangePassword,
+    suChangeUsername,
+    unbanUser
+  } from '@/functions'
   import { newPasswordRules, usernameRules } from '@/functions/validation'
   import { UserResponse } from '@/interfaces'
   import { onMounted, ref } from 'vue'
@@ -68,6 +76,12 @@
 
       return user
     })
+    modal.value = false
+  }
+
+  async function updateOtp (id: number, otp: boolean) {
+    await suChangeOtp(id, otp)
+    await readUsers()
     modal.value = false
   }
 
@@ -142,6 +156,7 @@
     @close="modal = false"
     @update:password="updatePassword($event.id, $event.password)"
     @update:username="updateUsername($event.id, $event.username)"
+    @update:otp="updateOtp($event.id, $event.enableOtp)"
   />
 
 </template>

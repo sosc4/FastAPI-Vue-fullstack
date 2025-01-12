@@ -7,7 +7,7 @@
     userId: Number,
   })
 
-  const emit = defineEmits(['close', 'update:username', 'update:password'])
+  const emit = defineEmits(['close', 'update:username', 'update:password', 'update:otp'])
 
   const dialog = ref(props.value)
   watch(() => props.value, newVal => {
@@ -16,8 +16,10 @@
 
   const validUsername = ref(false)
   const validPassword = ref(false)
+  const validOtp = ref(false)
   const newUsername = ref('')
   const newPassword = ref('')
+  const enableOtp = ref(false)
 
   const close = () => {
     dialog.value = false
@@ -41,6 +43,16 @@
       })
     }
   }
+
+  const saveOtp = () => {
+    if (validOtp.value) {
+      emit('update:otp', {
+        id: props.userId,
+        enableOtp: enableOtp.value,
+      })
+    }
+  }
+
 </script>
 
 <template>
@@ -93,6 +105,27 @@
             type="submit"
           >
             Zapisz hasło
+          </v-btn>
+        </v-card-actions>
+      </v-form>
+
+      <v-form v-model="validOtp" @submit.prevent="saveOtp">
+        <v-card-title>
+          Zmień Status Jednorazowego Hasła
+        </v-card-title>
+        <v-card-text>
+          <v-checkbox
+            v-model="enableOtp"
+            label="Jednorazowe hasło"
+          />
+        </v-card-text>
+        <v-card-actions>
+          <v-btn
+            color="secondary"
+            :disabled="!validOtp"
+            type="submit"
+          >
+            Zapisz status jednorazowego hasła
           </v-btn>
         </v-card-actions>
       </v-form>

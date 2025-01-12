@@ -63,6 +63,17 @@ export async function deleteUser (id: number) {
   toast.success('Użytkownik został usunięty')
 }
 
+export async function suChangeOtp (id: number, enableOtp: boolean) {
+    const api = Api.getInstance()
+    const toast = useToast()
+
+    await api.updateUser(id, { enable_otp: enableOtp })
+
+    const state = enableOtp ? 'włączony' : 'wyłączony'
+    toast.success(`Otp został ${state}`)
+
+}
+
 export async function suChangeUsername (id: number, username: string) {
   const api = Api.getInstance()
   const toast = useToast()

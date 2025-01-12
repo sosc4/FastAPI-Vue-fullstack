@@ -11,6 +11,22 @@
   const password = ref('')
   const valid = ref(false)
 
+  const useOtp = ref<boolean>(false)
+  const x = ref<number | undefined>(undefined)
+  const a = ref<number | undefined>(undefined)
+
+  function toggleOtp() {
+    useOtp.value = !useOtp.value
+
+    if (useOtp.value) {
+      x.value = Math.floor(Math.random() * 10) + 1
+      a.value = Math.floor(Math.random() * 10) + 1
+    } else {
+      x.value = undefined
+      a.value = undefined
+    }
+  }
+
   async function login () {
     const userStore = useUser()
     const toast = useToast()
@@ -19,6 +35,8 @@
     await apiCore.login({
       username: username.value,
       password: password.value,
+      x: x.value,
+      a: a.value,
     })
 
     if (!ApiCore.isLoggedIn) {
@@ -32,6 +50,7 @@
 
     await router.push({ name: 'home' })
   }
+
 
 </script>
 
@@ -62,7 +81,15 @@
           required
           :rules="passwordRules"
           type="password"
+          append-inner-icon="mdi-lock-clock"
+          @click:append-inner="toggleOtp"
         />
+
+        <v-row v-if="useOtp">
+          <v-col>
+            x: {{ x }} a: {{ a }}
+          </v-col>
+        </v-row>
 
         <v-btn
           block

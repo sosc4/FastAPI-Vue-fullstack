@@ -37,9 +37,6 @@ export class ApiCore {
         config.headers.Authorization = `Bearer ${token}`
       }
 
-      // expiry is UNIX timestamp in seconds. If it is about to expire (30 seconds) send a request to /refresh
-      console.log(`Token expires in ${accessTokenPayload.exp - Date.now() / 1000} seconds`)
-
       if (token && accessTokenPayload.exp - Date.now() / 1000 <= 0) {
         const toast = useToast()
         toast.error('Wylogowano z powodu wygaśnięcia sesji')
@@ -49,7 +46,6 @@ export class ApiCore {
       }
 
       if (token && accessTokenPayload.exp - Date.now() / 1000 < 30) {
-        console.log('Refreshing token')
         try {
           const response = await axios.post<JWTAccessToken>(`${this.baseURL}/auth/refresh`, {}, {
             headers: {
@@ -62,7 +58,6 @@ export class ApiCore {
             config.headers.Authorization = `Bearer ${response.data.access_token}`
           }
         } catch (error) {
-          console.error(error)
           ApiCore.clearToken()
         }
       }
@@ -111,21 +106,28 @@ export class ApiCore {
     return ApiCore.instance
   }
 
-  async login (formData: { username: string; password: string; }) {
-    const params = new URLSearchParams()
-    params.append('username', formData.username)
-    params.append('password', formData.password)
+  async login(formData: { username: string; password: string; x?: number; a?: number }) {
+    const params = new URLSearchParams();
+    params.append('username', formData.username);
+    params.append('password', formData.password);
+
+    if (formData.x !== undefined) {
+      params.append('x', formData.x.toString());
+    }
+    if (formData.a !== undefined) {
+      params.append('a', formData.a.toString());
+    }
 
     const response = await this.client.post<JWTAccessToken>('/auth/login', params, {
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
       },
-    })
+    });
 
     if (response.data.access_token) {
-      ApiCore.setToken(response.data)
+      ApiCore.setToken(response.data);
     }
 
-    return response.data
+    return response.data;
   }
 }

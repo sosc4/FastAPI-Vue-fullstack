@@ -1,6 +1,7 @@
 export interface UserCreate {
   username: string;
   password: string;
+  enable_otp?: boolean;
 }
 
 export interface UserUpdate {
@@ -9,6 +10,7 @@ export interface UserUpdate {
   is_admin?: boolean;
   is_active?: boolean;
   password_expires?: string; // Use string because dates are often returned as ISO strings in JSON
+  enable_otp?: boolean;
 }
 
 export interface UserResponse {
@@ -17,6 +19,7 @@ export interface UserResponse {
   is_admin: boolean;
   is_active: boolean;
   force_password_change: boolean;
+  enable_otp: boolean;
   password_expires?: string; // Use string for optional datetime fields
 }
 
