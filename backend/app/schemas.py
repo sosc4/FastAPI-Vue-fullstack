@@ -7,6 +7,7 @@ from pydantic import BaseModel, model_validator
 class UserCreate(BaseModel):
     username: str
     password: str
+    enable_otp: Optional[bool] = False
 
 
 class UserUpdate(BaseModel):
@@ -15,6 +16,7 @@ class UserUpdate(BaseModel):
     is_admin: Optional[bool] = None
     is_active: Optional[bool] = None
     password_expires: Optional[datetime] = None
+    enable_otp: Optional[bool] = None
 
 
 class UserResponse(BaseModel):
@@ -23,6 +25,7 @@ class UserResponse(BaseModel):
     is_admin: bool
     is_active: bool
     force_password_change: bool
+    enable_otp: bool
     password_expires: Optional[datetime]
 
     @model_validator(mode="before")

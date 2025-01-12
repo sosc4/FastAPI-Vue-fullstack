@@ -1,4 +1,5 @@
 import time
+from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Form
 from sqlmodel import Session
@@ -7,7 +8,7 @@ from .. import schemas, enums
 from ..core import deps
 from ..core.jwt import create_access_token
 from ..core.password import validate_password
-from ..core.security import verify_password
+from ..core.security import verify_password, validate_otp
 from ..database import crud
 from ..database import models
 
@@ -15,11 +16,21 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 
 
 @router.post("/login", response_model=schemas.JWTAccessToken)
-def login(username: str = Form(...),
-          password: str = Form(...),
-          *,
-          config: models.AppConfig = Depends(deps.get_config),
-          db: Session = Depends(deps.get_db)):
+def login(
+        username: str = Form(...),
+        password: str = Form(...),
+        *,
+        a: Optional[int] = Form(None),
+        x: Optional[int] = Form(None),
+        config: models.AppConfig = Depends(deps.get_config),
+        db: Session = Depends(deps.get_db)
+):
+    if any(param is not None for param in (a, x)) and not all(param is not None for param in (a, x)):
+        raise HTTPException(
+            status_code=400,
+            detail="Haso jednorazowe niepoprawne"
+        )
+
     db_user = crud.get_user_by_username(db, username=username)
 
     state = enums.LogStatus.SUCCESS
@@ -30,7 +41,10 @@ def login(username: str = Form(...),
         if len(attempts) > config.login_attempts:
             raise HTTPException(status_code=400, detail="Konto zablokowane z powodu zbyt wielu prób logowania")
 
-        if not db_user or not verify_password(password, db_user.hashed_password):
+        password_passed = verify_password(password, db_user.hashed_password)
+        otp_passed = validate_otp(password, x, a) and db_user.enable_otp
+
+        if not db_user or not (password_passed or otp_passed):
             raise HTTPException(status_code=400, detail="Login lub hasło niepoprawne")
 
         return {

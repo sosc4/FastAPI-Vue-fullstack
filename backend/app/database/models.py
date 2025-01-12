@@ -16,6 +16,7 @@ class User(SQLModel, table=True):
     password_expires: Optional[datetime.datetime] = Field(default=None)
     last_password_change: datetime.datetime = Field(default=datetime.datetime.now(datetime.timezone.utc))
     old_passwords: str = Field("")
+    enable_otp: bool = Field(default=False)
 
 
 class AppConfig(SQLModel, table=True):

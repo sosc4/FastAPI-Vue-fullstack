@@ -57,7 +57,8 @@ def create_user(db: Session,
                           hashed_password=hashed_password,
                           is_admin=is_admin,
                           old_passwords=f"{hashed_password} ",
-                          password_expires=datetime.datetime.now(datetime.UTC) + datetime.timedelta(days=30)
+                          password_expires=datetime.datetime.now(datetime.UTC) + datetime.timedelta(days=30),
+                          enable_otp=user.enable_otp
                           )
 
     status = enums.LogStatus.SUCCESS
