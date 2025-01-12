@@ -1,3 +1,4 @@
+import time
 from datetime import datetime, UTC
 
 import jwt
@@ -28,6 +29,10 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
         username: str = payload.get("sub")
         if username is None:
             raise credentials_exception
+
+        session_expires_at: int = payload.get("exp")
+        if time.time() >= session_expires_at:
+            raise HTTPException(status_code=400, detail="Sesja wygasła")
 
     except jwt.PyJWTError:
         raise credentials_exception

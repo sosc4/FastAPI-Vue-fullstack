@@ -26,6 +26,7 @@ class AppConfig(SQLModel, table=True):
     password_require_special: bool = Field(default=True)
     password_expire_days: int = Field(default=30)
     login_attempts: int = Field(default=3)
+    session_expire_seconds: int = Field(default=300)
 
 
 class Log(SQLModel, table=True):

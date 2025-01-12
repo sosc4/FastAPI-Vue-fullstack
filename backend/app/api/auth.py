@@ -1,3 +1,5 @@
+import time
+
 from fastapi import APIRouter, Depends, HTTPException, Form
 from sqlmodel import Session
 
@@ -32,7 +34,8 @@ def login(username: str = Form(...),
             raise HTTPException(status_code=400, detail="Login lub hasło niepoprawne")
 
         return {
-            "access_token": create_access_token(data={"sub": db_user.username}),
+            "access_token": create_access_token(data={"sub": db_user.username,
+                                                      "exp": int(time.time()) + config.session_expire_seconds}),
             "token_type": "bearer"
         }
 
@@ -43,6 +46,18 @@ def login(username: str = Form(...),
 
     finally:
         crud.create_log(db, db_user.id, enums.LogEvent.LOGIN, state)
+
+
+@router.post("/refresh", response_model=schemas.JWTAccessToken)
+def refresh_token(
+        db: Session = Depends(deps.get_db),
+        user=Depends(deps.get_current_user),
+        config: models.AppConfig = Depends(deps.get_config)):
+    return {
+        "access_token": create_access_token(data={"sub": user.username,
+                                                  "exp": int(time.time()) + config.session_expire_seconds}),
+        "token_type": "bearer"
+    }
 
 
 @router.patch("/password", response_model=schemas.UserResponse)

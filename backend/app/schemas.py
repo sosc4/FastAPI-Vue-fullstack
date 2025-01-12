@@ -56,6 +56,8 @@ class AppConfig(BaseModel):
     password_require_digit: bool
     password_require_special: bool
     password_expire_days: int
+    login_attempts: int
+    session_expire_seconds: int
 
 
 class AppConfigUpdate(AppConfig):
@@ -64,6 +66,8 @@ class AppConfigUpdate(AppConfig):
     password_require_digit: Optional[bool] = None
     password_require_special: Optional[bool] = None
     password_expire_days: Optional[int] = None
+    login_attempts: Optional[int] = None
+    session_expire_seconds: Optional[int] = None
 
 
 __all__ = [
